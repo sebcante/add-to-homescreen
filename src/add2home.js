@@ -3,6 +3,7 @@ define([], function() {
 /*!
  * Add to Homescreen v2.0 ~ Copyright (c) 2012 Matteo Spinelli, http://cubiq.org
  * Released under MIT license, http://cubiq.org/license
+ * FORK : git@github.com:sebcante/add-to-homescreen.git
  */
 var addToHome = (function (w) {
 	var nav = w.navigator,
@@ -98,7 +99,7 @@ var addToHome = (function (w) {
 
 		balloon = document.createElement('div');
 		balloon.id = 'addToHomeScreen';
-		balloon.style.cssText += 'left:-9999px;-webkit-transition-property:-webkit-transform,opacity;-webkit-transition-duration:0;-webkit-transform:translate3d(0,0,0);position:' + (OSVersion < 5 ? 'absolute' : 'fixed');
+		balloon.style.cssText += 'left:-9999px;-webkit-transition-property:-webkit-transform,opacity;-webkit-transition-duration:0;-webkit-transform:translate3d(0,0,0);position:' + (OSVersion < 5 ? 'absolute' : 'absolute'/*'fixed'*/);
 
 		// Localize message
 		if ( options.message in intl ) {		// You may force a language despite the user's locale
@@ -143,7 +144,7 @@ var addToHome = (function (w) {
 	}
 
 	function show () {
-	
+	alert('show');
 		var duration,
 			iPadXShift = 160;
 
@@ -178,12 +179,14 @@ var addToHome = (function (w) {
 			if ( OSVersion < 5 ) {
 				startX = Math.round((w.innerWidth - balloon.offsetWidth) / 2) + w.scrollX;
 				balloon.style.left = startX + 'px';
-				balloon.style.top = startY - balloon.offsetHeight - options.bottomOffset + 'px';
 			} else {
 				balloon.style.left = '50%';
 				balloon.style.marginLeft = -Math.round(balloon.offsetWidth / 2) + 'px';
-				balloon.style.bottom = options.bottomOffset + 'px';
+				// SEB HACK could not get position fixed to work with ios5 and qanda
+//				balloon.style.bottom = options.bottomOffset + 'px';
 			}
+			// SEB HACK could not get position fixed to work with ios5 and qanda
+			balloon.style.top = startY - balloon.offsetHeight - options.bottomOffset + 'px';
 
 			switch (options.animationIn) {
 				case 'drop':
@@ -289,7 +292,8 @@ var addToHome = (function (w) {
 		}
 
 		// On iOS 4 we start checking the element position
-		if ( OSVersion < 5 && closeTimeout ) positionInterval = setInterval(setPosition, options.iterations);
+		// SEB HACK could not get position fixed to work with ios5 and qanda
+		if ( /*OSVersion < 5 &&*/ closeTimeout ) positionInterval = setInterval(setPosition, options.iterations);
 	}
 
 	function setPosition () {
