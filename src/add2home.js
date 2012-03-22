@@ -1,3 +1,6 @@
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+// FORK from: git@github.com:sebcante/add-to-homescreen.git
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 define([], function() {       
    
 /*!
@@ -69,10 +72,14 @@ var addToHome = (function (w) {
 		OSVersion = nav.appVersion.match(/OS (\d+_\d+)/i);
 		OSVersion = OSVersion[1] ? +OSVersion[1].replace('_', '.') : 0;
 		
-		isExpired = +w.localStorage.getItem('addToHome') || now;
+		// SEB HACK needed so the buble does not come at the first visit when options.returningVisitor =true https://github.com/cubiq/add-to-homescreen/issues/20
+		var hasEverVisitedMe = +w.localStorage.getItem('addToHome') !==0;
+		isExpired = +w.localStorage.getItem('addToHome') ;
 		isSessionActive = w.sessionStorage.getItem('addToHomeSession');
-		isReturningVisitor = !options.returningVisitor || ( isExpired && isExpired + 28*24*60*60*1000 > now );			// You are considered a "returning visitor" if you access the site more than once/month
-
+		isReturningVisitor = !options.returningVisitor || ( hasEverVisitedMe && isExpired + 28*24*60*60*1000 > now );			// You are considered a "returning visitor" if you access the site more than once/month
+		
+		
+		 
 		// If it is expired we need to reissue a new balloon
 		isExpired = ( !options.expire || isExpired <= now );
 
@@ -82,12 +89,14 @@ var addToHome = (function (w) {
 
 	function loaded () {
 		w.removeEventListener('load', loaded, false);
-
-		if ( !overrideChecks && (!isSafari || !isExpired || isSessionActive || isStandalone || !isReturningVisitor) ) return;
-
+		//  SEB HACK  need to put it before the check so returningVisitor work	
 		if ( options.expire || options.returningVisitor ) {
 			w.localStorage.setItem('addToHome', Date.now() + options.expire * 60000);
 		}
+		
+		if ( !overrideChecks && (!isSafari || !isExpired || isSessionActive || isStandalone || !isReturningVisitor) ) return;
+
+		
 
 		var icons = options.touchIcon ? document.querySelectorAll('head link[rel=apple-touch-icon],head link[rel=apple-touch-icon-precomposed]') : [],
 			sizes,
@@ -144,7 +153,7 @@ var addToHome = (function (w) {
 	}
 
 	function show () {
-	alert('show');
+	
 		var duration,
 			iPadXShift = 160;
 
