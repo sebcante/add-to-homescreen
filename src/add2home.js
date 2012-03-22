@@ -18,6 +18,7 @@ var addToHome = (function (w) {
 		OSVersion,
 		startX = 0,
 		startY = 0,
+		lastVisit = 0,
 		isExpired,
 		isSessionActive,
 		isReturningVisitor,
@@ -64,38 +65,34 @@ var addToHome = (function (w) {
 		}
 		if ( !options.autostart ) options.hookOnLoad = false;
 
-		isIPad = (/ipad/gi).test(nav.platform);
-		isRetina = w.devicePixelRatio && w.devicePixelRatio > 1;
-		isSafari = nav.appVersion.match(/Safari/gi);
-		isStandalone = nav.standalone;
-		
-		OSVersion = nav.appVersion.match(/OS (\d+_\d+)/i);
-		OSVersion = OSVersion[1] ? +OSVersion[1].replace('_', '.') : 0;
-		
-		// SEB HACK needed so the buble does not come at the first visit when options.returningVisitor =true https://github.com/cubiq/add-to-homescreen/issues/20
-		var hasEverVisitedMe = +w.localStorage.getItem('addToHome') !==0;
-		isExpired = +w.localStorage.getItem('addToHome') ;
-		isSessionActive = w.sessionStorage.getItem('addToHomeSession');
-		isReturningVisitor = !options.returningVisitor || ( hasEverVisitedMe && isExpired + 28*24*60*60*1000 > now );			// You are considered a "returning visitor" if you access the site more than once/month
-		
-		
-		 
-		// If it is expired we need to reissue a new balloon
-		isExpired = ( !options.expire || isExpired <= now );
+				isIPad = (/ipad/gi).test(nav.platform);
+				isRetina = w.devicePixelRatio && w.devicePixelRatio > 1;
+				isSafari = nav.appVersion.match(/Safari/gi);
+				isStandalone = nav.standalone;
 
-		if ( options.hookOnLoad ) w.addEventListener('load', loaded, false);
-		else if ( !options.hookOnLoad && options.autostart ) loaded();
+				OSVersion = nav.appVersion.match(/OS (\d+_\d+)/i);
+				OSVersion = OSVersion[1] ? +OSVersion[1].replace('_', '.') : 0;
+
+				lastVisit = +w.localStorage.getItem('addToHome');
+
+				isSessionActive = w.sessionStorage.getItem('addToHomeSession');
+				isReturningVisitor = options.returningVisitor ? lastVisit && lastVisit + 28*24*60*60*1000 > now : true;
+
+				if ( !lastVisit ) lastVisit = now;
+
+				// If it is expired we need to reissue a new balloon
+				isExpired = isReturningVisitor && lastVisit <= now;
+
+				if ( options.hookOnLoad ) w.addEventListener('load', loaded, false);
+				else if ( !options.hookOnLoad && options.autostart ) loaded();
 	}
 
 	function loaded () {
 		w.removeEventListener('load', loaded, false);
-		//  SEB HACK  need to put it before the check so returningVisitor work	
-		if ( options.expire || options.returningVisitor ) {
-			w.localStorage.setItem('addToHome', Date.now() + options.expire * 60000);
-		}
-		
-		if ( !overrideChecks && (!isSafari || !isExpired || isSessionActive || isStandalone || !isReturningVisitor) ) return;
+		if ( !isReturningVisitor ) w.localStorage.setItem('addToHome', Date.now());
+				else if ( options.expire && isExpired ) w.localStorage.setItem('addToHome', Date.now() + options.expire * 60000);
 
+				if ( !overrideChecks && ( !isSafari || !isExpired || isSessionActive || isStandalone || !isReturningVisitor ) ) return;
 		
 
 		var icons = options.touchIcon ? document.querySelectorAll('head link[rel=apple-touch-icon],head link[rel=apple-touch-icon-precomposed]') : [],
