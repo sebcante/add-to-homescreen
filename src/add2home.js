@@ -186,15 +186,15 @@ var addToHome = (function (w) {
 			startY = w.innerHeight + w.scrollY;
 
 			if ( OSVersion < 5 ) {
-				startX = Math.round((w.innerWidth - balloon.offsetWidth) / 2) + w.scrollX;
-				balloon.style.left = startX + 'px';
 			} else {
-				balloon.style.left = '50%';
-				balloon.style.marginLeft = -Math.round(balloon.offsetWidth / 2) + 'px';
+//				balloon.style.left = '50%';
+//				balloon.style.marginLeft = -Math.round(balloon.offsetWidth / 2) + 'px';
 				// SEB HACK could not get position fixed to work with ios5 and qanda
 //				balloon.style.bottom = options.bottomOffset + 'px';
 			}
 			// SEB HACK could not get position fixed to work with ios5 and qanda
+            startX = Math.round((w.innerWidth - balloon.offsetWidth) / 2) + w.scrollX;
+            balloon.style.left = startX + 'px';
 			balloon.style.top = startY - balloon.offsetHeight - options.bottomOffset + 'px';
 
 			switch (options.animationIn) {
